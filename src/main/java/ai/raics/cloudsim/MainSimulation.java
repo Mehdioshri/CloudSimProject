@@ -123,6 +123,25 @@ public class MainSimulation {
         List<Cloudlet> finishedCloudlets =
                 broker.getCloudletFinishedList();
 
+
+// --------------------------------
+// 12. Analyze simulation results
+// --------------------------------
+
+ResultsAnalyzer analyzer =
+        new ResultsAnalyzer();
+
+analyzer.analyze(
+        finishedCloudlets,
+        vmList,
+        "BASELINE",
+        lambda
+);
+
+analyzer.printBestAlgorithm();
+
+
+
         // --------------------------------
         // 12. Print results
         // --------------------------------

@@ -1,0 +1,2 @@
+Algorithm,Lambda,Cloudlets,Makespan,TotalExecutionTime,AverageExecutionTime,AverageWaitingTime,LoadImbalance,AverageVMUtilization,Throughput
+BASELINE,20.0000,1000,189.3680,81703.3071,81.7033,0.1000,0.6469,21.5726,5.2807
