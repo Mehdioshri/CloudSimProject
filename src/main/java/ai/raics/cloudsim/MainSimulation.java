@@ -65,8 +65,7 @@ public class MainSimulation {
                 cloudletGenerator.createCloudlets(
                         arrivalTimes
                 );
-                MinMinScheduler minMinScheduler = new MinMinScheduler();
-                minMinScheduler.schedule(cloudletList, vmList);
+               
 
         broker.submitCloudletList(
                 cloudletList
@@ -92,12 +91,6 @@ public class MainSimulation {
                 lambda
         );
 
-analyzer.analyze(
-                finishedCloudlets,
-                vmList,
-                "Min-Min",
-                lambda
-        );
 
 
 
