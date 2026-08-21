@@ -17,42 +17,37 @@ public class MainSimulation {
         System.out.println("CloudSim Project Starting...");
         System.out.println("======================================");
 
-        // --------------------------------
-        // 1. Create CloudSim simulation
-        // --------------------------------
+        runBaseline();
 
-        CloudSimPlus simulation = new CloudSimPlus();
+        runFCFS();
 
-        // --------------------------------
-        // 2. Create Datacenter
-        // --------------------------------
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("All simulations finished.");
+        System.out.println("======================================");
+    }
+
+
+    private static void runBaseline() {
+
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("RUNNING BASELINE");
+        System.out.println("======================================");
+
+        CloudSimPlus simulation =
+                new CloudSimPlus();
 
         Datacenter datacenter =
                 DatacenterCreator.createDatacenter(simulation);
 
-        // --------------------------------
-        // 3. Create VMs
-        // --------------------------------
-
         List<Vm> vmList =
                 VmCreator.createVms();
-
-        // --------------------------------
-        // 4. Create Broker
-        // --------------------------------
 
         DatacenterBroker broker =
                 new DatacenterBrokerSimple(simulation);
 
-        // --------------------------------
-        // 5. Submit VMs to Broker
-        // --------------------------------
-
         broker.submitVmList(vmList);
-
-        // --------------------------------
-        // 6. Generate Poisson arrivals
-        // --------------------------------
 
         PoissonTaskGenerator poissonGenerator =
                 new PoissonTaskGenerator();
@@ -63,109 +58,144 @@ public class MainSimulation {
         List<Double> arrivalTimes =
                 poissonGenerator.generateTasks(lambda);
 
-        // --------------------------------
-        // 7. Create Cloudlets
-        // --------------------------------
+        CloudletGenerator cloudletGenerator =
+                new CloudletGenerator();
+
+        List<Cloudlet> cloudletList =
+                cloudletGenerator.createCloudlets(
+                        arrivalTimes
+                );
+                MinMinScheduler minMinScheduler = new MinMinScheduler();
+                minMinScheduler.schedule(cloudletList, vmList);
+
+        broker.submitCloudletList(
+                cloudletList
+        );
+
+        System.out.println();
+        System.out.println(
+                "Starting BASELINE simulation..."
+        );
+
+        simulation.start();
+
+        List<Cloudlet> finishedCloudlets =
+                broker.getCloudletFinishedList();
+
+        ResultsAnalyzer analyzer =
+                new ResultsAnalyzer();
+
+        analyzer.analyze(
+                finishedCloudlets,
+                vmList,
+                "BASELINE",
+                lambda
+        );
+
+analyzer.analyze(
+                finishedCloudlets,
+                vmList,
+                "Min-Min",
+                lambda
+        );
+
+
+
+
+
+        System.out.println(
+                "BASELINE completed Cloudlets: "
+                        + finishedCloudlets.size()
+        );
+    }
+
+
+    private static void runFCFS() {
+
+        System.out.println();
+        System.out.println("======================================");
+        System.out.println("RUNNING FCFS");
+        System.out.println("======================================");
+
+        CloudSimPlus simulation =
+                new CloudSimPlus();
+
+        Datacenter datacenter =
+                DatacenterCreator.createDatacenter(simulation);
+
+        List<Vm> vmList =
+                VmCreator.createVms();
+
+        DatacenterBroker broker =
+                new DatacenterBrokerSimple(simulation);
+
+        broker.submitVmList(vmList);
+
+        PoissonTaskGenerator poissonGenerator =
+                new PoissonTaskGenerator();
+
+        double lambda =
+                SimulationConfig.LAMBDA_1;
+
+        List<Double> arrivalTimes =
+                poissonGenerator.generateTasks(lambda);
 
         CloudletGenerator cloudletGenerator =
                 new CloudletGenerator();
 
         List<Cloudlet> cloudletList =
-                cloudletGenerator.createCloudlets(arrivalTimes);
+                cloudletGenerator.createCloudlets(
+                        arrivalTimes
+                );
 
-        // --------------------------------
-        // 8. Submit Cloudlets to Broker
-        // --------------------------------
 
-        broker.submitCloudletList(cloudletList);
+        // ======================================
+        // FCFS SCHEDULER
+        // ======================================
 
-        // --------------------------------
-        // 9. Print configuration
-        // --------------------------------
+        FCFSScheduler fcfsScheduler =
+                new FCFSScheduler();
+
+        fcfsScheduler.schedule(
+                cloudletList,
+                vmList
+        );
+
+
+        // ======================================
+        // Submit Cloudlets
+        // ======================================
+
+        broker.submitCloudletList(
+                cloudletList
+        );
+
 
         System.out.println();
-        System.out.println("Simulation Configuration");
-        System.out.println("--------------------------------------");
-
         System.out.println(
-                "Number of Hosts: "
-                + SimulationConfig.NUMBER_OF_HOSTS
+                "Starting FCFS simulation..."
         );
-
-        System.out.println(
-                "Number of VMs: "
-                + vmList.size()
-        );
-
-        System.out.println(
-                "Number of Cloudlets: "
-                + cloudletList.size()
-        );
-
-        System.out.println(
-                "Poisson Lambda: "
-                + lambda
-        );
-
-        // --------------------------------
-        // 10. Start simulation
-        // --------------------------------
-
-        System.out.println();
-        System.out.println("Starting simulation...");
 
         simulation.start();
-
-        // --------------------------------
-        // 11. Get finished Cloudlets
-        // --------------------------------
 
         List<Cloudlet> finishedCloudlets =
                 broker.getCloudletFinishedList();
 
 
-// --------------------------------
-// 12. Analyze simulation results
-// --------------------------------
+        ResultsAnalyzer analyzer =
+                new ResultsAnalyzer();
 
-ResultsAnalyzer analyzer =
-        new ResultsAnalyzer();
-
-analyzer.analyze(
-        finishedCloudlets,
-        vmList,
-        "BASELINE",
-        lambda
-);
-
-analyzer.printBestAlgorithm();
-
-
-
-        // --------------------------------
-        // 12. Print results
-        // --------------------------------
-
-        System.out.println();
-        System.out.println("======================================");
-        System.out.println("Simulation Finished");
-        System.out.println("======================================");
-
-        System.out.println(
-                "Submitted Cloudlets: "
-                + cloudletList.size()
+        analyzer.analyze(
+                finishedCloudlets,
+                vmList,
+                "FCFS",
+                lambda
         );
 
-        System.out.println(
-                "Finished Cloudlets: "
-                + finishedCloudlets.size()
-        );
 
         System.out.println(
-                "Created VMs: "
-                + broker.getVmCreatedList().size()
+                "FCFS completed Cloudlets: "
+                        + finishedCloudlets.size()
         );
-
-        System.out.println("======================================");
     }
 }
