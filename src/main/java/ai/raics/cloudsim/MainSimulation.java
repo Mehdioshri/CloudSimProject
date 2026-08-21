@@ -21,6 +21,14 @@ public class MainSimulation {
 
         runFCFS();
 
+
+runMinMin();
+
+
+
+
+
+
         System.out.println();
         System.out.println("======================================");
         System.out.println("All simulations finished.");
